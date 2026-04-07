@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: jihamap-backend
+  jackson:
+    time-zone: Asia/Seoul
+
+server:
+  port: 43211
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+jihamap:
+  service:
+    version: 0.0.1-SNAPSHOT
+  cors:
+    allowed-origins:
+      - http://localhost:43210
+      - http://127.0.0.1:43210
