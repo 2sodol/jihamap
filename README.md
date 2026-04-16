@@ -1,172 +1,90 @@
 # JihaMap
 
-모바일 웹에서 서울권 지하철 운행 정보를 지도 위에 시각화하는 프로젝트다.  
-`VWorld` 지도를 기반으로 지하철 노선 레이어를 표시하고, 공공데이터의 실시간 열차 위치/도착 정보를 활용해 현재 열차가 어디쯤 있는지 사용자에게 직관적으로 보여주는 것을 목표로 한다.
+서울권 지하철 운행 정보를 모바일 웹 지도 위에 시각화하는 프로젝트다. 현재 저장소는 `Next.js` 프론트엔드와 `Spring Boot` 백엔드로 분리되어 있으며, MVP의 출발점으로 지도 베이스 화면과 상태 확인 API를 먼저 갖춘 상태다.
 
-## 1. 프로젝트 목표
+## Repository Layout
 
-이 프로젝트는 단순한 역 검색 앱이 아니라, `실시간 지하철 위치를 지도 위에서 이해하기 쉽게 보여주는 서비스`를 목표로 한다.
+- `frontend/`: Next.js 16, React 19, OpenLayers 기반 모바일 웹 클라이언트
+- `backend/`: Java 21, Spring Boot 3 기반 API 서버
+- `docs/`: 하네스 엔지니어링 운영 문서와 설치/상태 문서
+- `.gorchera/prompts/`: executor/evaluator 프로젝트 오버라이드
+- `examples/`: role profile 샘플과 goal 템플릿
 
-핵심 방향은 다음과 같다.
+## Quick Start
 
-- `VWorld` 배경지도 위에 지하철 노선 레이어를 실제 위치 기반으로 표시
-- 공공데이터의 `실시간 열차 위치정보`와 `실시간 도착정보`를 결합해 현재 열차 위치를 지도 위에 표시
-- `recptnDt`와 현재 시각 차이를 반영해 데이터 지연을 보정
-- 사용자가 열차를 눌렀을 때 다음 역 도착 예상 시간, 열차 정보 등을 확인 가능하게 구성
-- 사용자의 현재 위치 기준으로 가까운 역과 도보 이동 시간을 함께 제공할 수 있는 구조 설계
+### Prerequisites
 
-## 2. 문제 정의
-
-공공데이터에서 제공하는 지하철 실시간 데이터는 보통 `정확한 GPS 좌표`를 직접 주지 않는다.  
-대신 `이전역`, `다음역`, `현재역`, `도착정보 생성시각(recptnDt)` 같은 형태의 구간 정보를 제공한다.
-
-따라서 이 프로젝트의 핵심 문제는 다음과 같다.
-
-- 실시간 데이터의 지연을 어떻게 보정할 것인가
-- 역/구간 단위 데이터를 어떻게 지도 좌표로 변환할 것인가
-- 사용자에게는 실제로 열차가 움직이는 것처럼 자연스럽게 보이게 만들 것인가
-
-즉, 이 서비스의 본질은 `실시간 데이터 시각화`이면서 동시에 `위치 추정 서비스`다.
-
-## 3. MVP 목표
-
-1차 MVP에서는 아래 기능을 완성 목표로 둔다.
-
-### 필수 기능
-
-- 모바일 웹에서 동작하는 지도 UI 제공
-- `VWorld` 지도 표시
-- 지하철 노선 레이어 표시
-- 역 좌표 기반 주요 역사 마커 표시
-- 공공데이터 기반 실시간 열차 위치 표시
-- `recptnDt` 기준 위치 보정 로직 적용
-- 열차 선택 시 기본 정보 표시
-  - 열차 번호
-  - 현재 구간
-  - 다음 역
-  - 다음 역 도착 예상 시간
-  - 데이터 기준 시각
-
-### 1차에서는 제외하는 것
-
-- 로그인/회원 기능
-- 즐겨찾기/개인화
-- WebSocket 기반 실시간 스트리밍
-- 실시간 개별 열차 혼잡도
-- 관리자 페이지
-- 네이티브 앱 대응
-
-## 4. 추후 확장 목표
-
-MVP 이후에는 아래 기능으로 확장하는 것을 목표로 한다.
-
-- 열차 클릭 시 상세 바텀시트 제공
-- 열차별 `예상 혼잡도` 표시
-- 사용자 현재 위치에서 가까운 역까지의 도보 시간 제공
-- 특정 역 기준 도착 예정 열차 목록 제공
-- 노선/방향/급행 여부 필터 제공
-- 지하철 위치 애니메이션 고도화
-- 지하철 외 버스/환승 동선 연계
-
-## 5. 기술 스택
-
-현재 기준 추천 스택은 아래와 같다.
-
-### Frontend
-
-- `Next.js`
-- `TypeScript`
-- `OpenLayers`
-- `Tailwind CSS`
-- `TanStack Query`
-
-### Backend
-
+- `Node.js 20+`
+- `npm 10+`
 - `Java 21`
-- `Spring Boot 3`
-- `Spring WebClient`
-- `Bean Validation`
-- `Spring Boot Actuator`
-- `Caffeine Cache`
-- `JTS`
-
-### Infra
-
-- 프론트: `Vercel`
-- 백엔드 API: `Mac mini 홈서버`
-- 외부 노출: `Cloudflare Tunnel`
-
-## 6. 기술 스택 선정 이유
 
 ### Frontend
 
-- `Next.js`: 배포와 프로젝트 구조 관리가 쉽고, 모바일 웹 기반 서비스 구축에 적합하다.
-- `OpenLayers`: `VWorld` 타일/레이어와 결합해 지도 위에 노선, 역, 열차 마커를 세밀하게 제어하기 좋다.
-- `TanStack Query`: 실시간 API 폴링, 캐시, 재시도, 로딩/에러 처리를 단순하게 만들 수 있다.
-- `Tailwind CSS`: 모바일 우선 UI를 빠르게 구성하기 좋다.
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+기본 개발 주소는 `http://localhost:43210`이다.
+
+선택 환경 변수:
+
+```bash
+NEXT_PUBLIC_API_BASE_URL=http://localhost:43211
+NEXT_PUBLIC_VWORLD_API_KEY=your_vworld_key
+```
+
+`NEXT_PUBLIC_VWORLD_API_KEY`가 없으면 개발용 `OSM` 베이스맵으로 폴백한다.
 
 ### Backend
 
-- `Spring Boot`: 현재 홈서버 운영 환경과 가장 잘 맞고, 외부 API 연동 및 위치 보정 로직 구현에 유리하다.
-- `WebClient`: 서울시 공공데이터, VWorld, TMAP 등 외부 API 호출 처리에 적합하다.
-- `Validation`: API 요청 파라미터 검증용.
-- `Actuator`: 홈서버 운영 상태 확인용.
-- `Caffeine`: 짧은 TTL 캐시로 공공 API 호출량을 줄이기 좋다.
-- `JTS`: 노선 geometry 위에 열차 위치를 보간하고 좌표 계산을 처리하기 좋다.
+```bash
+cd backend
+./gradlew bootRun
+```
 
-## 7. 외부 데이터 및 API
+기본 개발 주소는 `http://localhost:43211`이다. 현재 추적 중인 설정 기준으로 백엔드 필수 비밀 값은 없다.
 
-현재 사용 예정 데이터/서비스는 아래와 같다.
+## Verification
 
-- `VWorld WMTS/TMS`: 배경지도
-- `서울시 지하철 실시간 열차 위치정보`: 열차 현재 구간 파악
-- `서울시 지하철 실시간 도착정보`: 역 기준 도착 정보 및 기준 시각 확보
-- `서울교통공사 역간거리 및 소요시간`: 위치 보정 및 ETA 계산
-- `서울교통공사 역사 좌표(위경도) 정보`: 역사 좌표
-- `도시철도 전체노선정보`: 노선 메타데이터
-- `TMAP 보행자 경로 API`: 현재 위치에서 역까지 도보 ETA 계산
-- `서울교통공사 지하철혼잡도정보`: 추후 예상 혼잡도 산정 참고용
+하네스 기준 검증 명령은 스택별로 고정한다.
 
-## 8. 핵심 도메인 로직
+- 프론트엔드 변경: `cd frontend && npm run lint` 후 `cd frontend && npm run build`
+- 백엔드 변경: `cd backend && ./gradlew test` 후 `cd backend && ./gradlew build`
+- 프론트/백엔드 동시 변경: 위 네 명령 모두 실행
 
-이 서비스의 핵심은 `실시간 열차 위치 추정`이다.
+현재 프론트엔드 자동 테스트는 없으므로 `lint + build`가 최소 게이트다. 변경 동작이 복잡해지면 테스트 추가를 우선 과제로 잡는 것이 원칙이다.
 
-기본 아이디어는 다음과 같다.
+## Harness Engineering
 
-1. 실시간 API에서 열차의 `이전역`, `다음역`, `현재역`, `recptnDt`를 수집한다.
-2. 현재 시각과 `recptnDt` 차이를 계산한다.
-3. 역간 평균 소요시간과 거리 정보를 사용해 열차 진행률을 추정한다.
-4. 노선 `GeoJSON` 선분 위에 진행률만큼 보간한 좌표를 계산한다.
-5. 해당 좌표를 지도 마커로 렌더링한다.
+이 저장소는 [HARNESS_ENGINEERING_OTHER_PROJECTS.md](/Users/wooseok/Desktop/jihamap/HARNESS_ENGINEERING_OTHER_PROJECTS.md)를 기준으로, JihaMap 전용 하네스 문서 구조를 루트에 적용했다. 기본 운영 시작값은 다음과 같다.
 
-즉, 실제 GPS 좌표를 받는 구조가 아니라 `역/구간 정보 + 시간 보정`으로 좌표를 추정하는 구조다.
+- provider: `codex`
+- pipeline mode: `balanced`
+- strictness: `normal`
+- ambition: `medium`
+- workspace mode: `isolated`
 
-## 9. 한계와 전제
+문서 인덱스:
 
-프로젝트 초기에 아래 사항을 전제로 한다.
+- [AGENTS.md](/Users/wooseok/Desktop/jihamap/AGENTS.md)
+- [docs/HARNESS_ENGINEERING.md](/Users/wooseok/Desktop/jihamap/docs/HARNESS_ENGINEERING.md)
+- [docs/INSTALL.md](/Users/wooseok/Desktop/jihamap/docs/INSTALL.md)
+- [docs/SUPERVISOR_GUIDE.md](/Users/wooseok/Desktop/jihamap/docs/SUPERVISOR_GUIDE.md)
+- [docs/PRINCIPLES.md](/Users/wooseok/Desktop/jihamap/docs/PRINCIPLES.md)
+- [docs/IMPLEMENTATION_STATUS.md](/Users/wooseok/Desktop/jihamap/docs/IMPLEMENTATION_STATUS.md)
+- [examples/role-profiles.sample.json](/Users/wooseok/Desktop/jihamap/examples/role-profiles.sample.json)
+- [examples/goals/bugfix.md](/Users/wooseok/Desktop/jihamap/examples/goals/bugfix.md)
+- [examples/goals/feature.md](/Users/wooseok/Desktop/jihamap/examples/goals/feature.md)
+- [examples/goals/refactor.md](/Users/wooseok/Desktop/jihamap/examples/goals/refactor.md)
 
-- 실시간 열차 위치는 `추정 좌표`다.
-- 공공데이터는 생성 시점과 현재 시점 사이에 지연이 있을 수 있다.
-- 서울시 외 구간 데이터는 일부 제한될 수 있다.
-- 실시간 개별 열차 혼잡도는 공식 공개데이터만으로 바로 제공하기 어렵다.
-- 도보 시간은 `VWorld` 자체 기능이 아니라 별도 보행 경로 API를 활용한다.
+## Product Direction
 
-## 10. MVP 성공 기준
+JihaMap MVP의 핵심 목표는 다음 세 가지다.
 
-아래 조건을 만족하면 1차 MVP가 성공한 것으로 본다.
+- `VWorld` 기반 지도 위에 지하철 노선과 역, 열차 상태를 올린다.
+- `recptnDt`를 이용해 데이터 지연을 보정한 추정 열차 위치를 제공한다.
+- 사용자가 열차를 눌렀을 때 다음 역 ETA와 기본 상태를 직관적으로 읽을 수 있게 한다.
 
-- 모바일 브라우저에서 서비스가 안정적으로 열린다.
-- 사용자가 지도에서 특정 노선을 볼 수 있다.
-- 지도 위에 실시간 열차 위치가 표시된다.
-- 열차를 눌렀을 때 현재 구간과 다음 역 ETA를 이해할 수 있다.
-- `recptnDt` 지연 보정이 적용되어, 단순 정적 표시보다 더 자연스러운 열차 위치가 보인다.
-
-## 11. 향후 작업 예정
-
-- 프로젝트 폴더 구조 정의
-- 프론트/백엔드 초기 셋업
-- 외부 API 키 및 환경 변수 정리
-- 노선/역 데이터 수집 및 `GeoJSON` 변환
-- 열차 위치 보정 알고리즘 설계
-- 모바일 UI/바텀시트 설계
-- 홈서버 배포 구성 정리
+현재 실제 구현 범위는 [docs/IMPLEMENTATION_STATUS.md](/Users/wooseok/Desktop/jihamap/docs/IMPLEMENTATION_STATUS.md)에 분리해 기록한다. 문서와 구현 현실을 혼동하지 않기 위해, 저장소 소개와 구현 상태는 의도적으로 나눠 관리한다.

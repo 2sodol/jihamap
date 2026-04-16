@@ -1,0 +1,26 @@
+{
+  "fast": {
+    "provider": "codex",
+    "pipeline_mode": "light",
+    "strictness_level": "normal",
+    "ambition_level": "low",
+    "workspace_mode": "isolated",
+    "role_overrides": {}
+  },
+  "balanced": {
+    "provider": "codex",
+    "pipeline_mode": "balanced",
+    "strictness_level": "normal",
+    "ambition_level": "medium",
+    "workspace_mode": "isolated",
+    "role_overrides": {}
+  },
+  "production": {
+    "provider": "codex",
+    "pipeline_mode": "full",
+    "strictness_level": "strict",
+    "ambition_level": "high",
+    "workspace_mode": "isolated",
+    "role_overrides": {}
+  }
+}
